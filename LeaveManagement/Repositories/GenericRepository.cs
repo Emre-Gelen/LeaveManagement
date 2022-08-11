@@ -20,7 +20,11 @@ namespace LeaveManagement.Repositories
             await _dbContext.SaveChangesAsync();
             return entity;
         }
-
+        public async Task AddRangeAsync(List<T> entities)
+        {
+            await _entity.AddRangeAsync(entities);
+            await _dbContext.SaveChangesAsync();
+        }
         public async Task DeleteAsync(int id)
         {
             var foundRecord = await GetAsync(id);

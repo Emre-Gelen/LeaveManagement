@@ -19,10 +19,12 @@ namespace LeaveManagement.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ILeaveTypeRepository _repository;
+        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
-        public LeaveTypesController(ILeaveTypeRepository repository, IMapper mapper)
+        public LeaveTypesController(ILeaveTypeRepository repository,ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper)
         {
             _repository = repository;
+            _leaveAllocationRepository = leaveAllocationRepository;
             _mapper = mapper;
         }
 
@@ -96,7 +98,7 @@ namespace LeaveManagement.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await LeaveTypeExistsAsync(leaveTypeVM.Id))
+                    if (!await _repository.Exists(leaveTypeVM.Id))
                     {
                         return NotFound();
                     }
@@ -119,9 +121,12 @@ namespace LeaveManagement.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<bool> LeaveTypeExistsAsync(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AllocateLeave(int id)
         {
-            return await _repository.Exists(id);
+            await _leaveAllocationRepository.LeaveAllocation(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

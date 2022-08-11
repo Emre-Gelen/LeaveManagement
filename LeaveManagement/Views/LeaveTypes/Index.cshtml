@@ -4,11 +4,12 @@
     ViewData["Title"] = "Index";
 }
 <style>
-    a i{
-        margin-right:8px;
+    a i {
+        margin-right: 8px;
     }
-    button i{
-        margin-right:8px;
+
+    button i {
+        margin-right: 8px;
     }
 </style>
 <h1>Index</h1>
@@ -39,6 +40,7 @@
                     @Html.DisplayFor(modelItem => item.DefaultDays)
                 </td>
                 <td>
+                    <button data-id="@item.Id" class="btn btn-primary allocateBtn" type="button">Allocate Leave</button>
                     <a class="btn btn-warning" asp-action="Edit" asp-route-id="@item.Id"><i class="fas fa-pencil-alt"></i>Edit</a> |
                     <a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id"><i class="fas fa-info-circle"></i>Details</a> |
                     @*<a class="btn btn-danger deleteBtn" asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
@@ -52,10 +54,13 @@
     <input type="hidden" id="leaveTypeId" name="Id" />
 </form>
 
+<form id="allocationForm" asp-action="AllocateLeave">
+    <input type="hidden" id="leaveTypeIdAllocation" name="Id" />
+</form>
+
 @section Scripts{
     <script>
         $(function() {
-            $('table.table').DataTable();
             $('.deleteBtn').click(function(e) {
                 swal({
                     title: "Are you sure?",
@@ -68,6 +73,22 @@
                         var deletedRecordId = $(this).data("id");
                         $('#leaveTypeId').val(deletedRecordId);
                         $('#deleteForm').submit();
+                    }
+                });
+            });
+
+            $('.allocateBtn').click(function(e) {
+                swal({
+                    title: "Are you sure?",
+                    text: "Are you sure you want to allocation this leave to all employee?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: true,
+                }).then((confirm) => {
+                    if (confirm) {
+                        var deletedRecordId = $(this).data("id");
+                        $('#leaveTypeIdAllocation').val(deletedRecordId);
+                        $('#allocationForm').submit();
                     }
                 });
             });
