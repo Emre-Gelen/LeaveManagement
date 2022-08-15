@@ -1,0 +1,108 @@
+﻿@model AdminRequestViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Admin Leave Requests View</h1>
+<div class="row">
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="card-text">@Html.DisplayNameFor(m => m.TotalRequests)</p>
+                <h4 class="card-title">@Model.TotalRequests</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="card-text">@Html.DisplayNameFor(m => m.ApprovedRequests)</p>
+                <h4 class="card-title text-success">@Model.ApprovedRequests</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="card-text">@Html.DisplayNameFor(m => m.PendingRequests)</p>
+                <h4 class="card-title text-warning">@Model.PendingRequests</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <p class="card-text">@Html.DisplayNameFor(m => m.RejectedRequests)</p>
+                <h4 class="card-title text-danger">@Model.RejectedRequests</h4>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+<h1>Leave Request Logs</h1>
+<hr />
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.RequestedEmployee.FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.NumberOfDays)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.LeaveType.Name)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.DateRequested)
+            </th>
+            <th>
+                @Html.DisplayNameForInnerType((LeaveRequestViewModel model) => model.Approved)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.LeaveRequests)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RequestedEmployee.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumberOfDays)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LeaveType.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateRequested)
+                </td>
+                <td>
+                    <span class="badge bg-@(item.Cancelled ? "secondary" : item.Approved == null ? "warning" : (item.Approved.Value ? "success" : "danger"))">
+                        @(item.Cancelled ? "Cancelled" : item.Approved == null ? "Pending" : (item.Approved.Value ? "Approved" : "Rejected"))
+                    </span>
+                </td>
+                <td>
+                    @if (!item.Cancelled)
+                    {
+                        <a asp-action="Details" asp-route-id="@item.Id">Review</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
