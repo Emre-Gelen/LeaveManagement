@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LeaveManagement.Constants;
 using LeaveManagement.Contracts;
 using LeaveManagement.Data;
@@ -14,16 +15,19 @@ namespace LeaveManagement.Repositories
         private readonly UserManager<Employee> _userManager;
         private readonly ILeaveTypeRepository _leaveTypeRepository;
         private readonly ApplicationDbContext _dbContext;
+        private readonly AutoMapper.IConfigurationProvider _configurationProvider;
         private readonly IMapper _mapper;
         public LeaveAllocationRepository(ApplicationDbContext dbContext,
                                          UserManager<Employee> userManager,
                                          ILeaveTypeRepository leaveTypeRepository,
-                                         IMapper mapper) : base(dbContext)
+                                         IMapper mapper,
+                                         AutoMapper.IConfigurationProvider configurationProvider) : base(dbContext)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _leaveTypeRepository = leaveTypeRepository;
             _mapper = mapper;
+            _configurationProvider = configurationProvider;
         }
 
         public async Task<bool> AllocationExists(string employeeID, int leaveTypeId, int period)
@@ -37,11 +41,13 @@ namespace LeaveManagement.Repositories
         {
             var allocations = await _dbContext.LeaveAllocations
                 .Include(q => q.LeaveType)
-                .Where(allocation => allocation.EmployeeId == employeeId).ToListAsync();
+                .Where(allocation => allocation.EmployeeId == employeeId)
+                .ProjectTo<LeaveAllocationViewModel>(_configurationProvider)
+                .ToListAsync();
             var employee = await _userManager.FindByIdAsync(employeeId);
 
             var employeeAllocationModel = _mapper.Map<EmployeeAllocationViewModel>(employee);
-            employeeAllocationModel.LeaveAllocations = _mapper.Map<List<LeaveAllocationViewModel>>(allocations);
+            employeeAllocationModel.LeaveAllocations = allocations;
 
             return employeeAllocationModel;
         }

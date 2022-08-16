@@ -8,9 +8,11 @@ namespace LeaveManagement.Models
         public int Id { get; set; }
         [DataType(DataType.Date)]
         [Display(Name = "Start Date")]
+        [DisplayFormat(DataFormatString = "{0:dd-MM-yy}")]
         public DateTime StartDate { get; set; }
         [DataType(DataType.Date)]
         [Display(Name = "End Date")]
+        [DisplayFormat(DataFormatString = "{0:dd-MM-yy}")]
         public DateTime EndDate { get; set; }
         [Display(Name = "Number Of Days")]
         public int NumberOfDays => (EndDate - StartDate).Days;

@@ -1,4 +1,5 @@
-﻿  using AutoMapper;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LeaveManagement.Contracts;
 using LeaveManagement.Data;
 using LeaveManagement.Models;
@@ -13,16 +14,19 @@ namespace LeaveManagement.Repositories
         private readonly IHttpContextAccessor _accessor;
         private readonly UserManager<Employee> _userManager;
         private readonly ILeaveAllocationRepository _allocationRepository;
+        private readonly AutoMapper.IConfigurationProvider _configurationProvider;
         public LeaveRequestRepository(ApplicationDbContext dbContext,
                                       IMapper mapper,
                                       IHttpContextAccessor accessor,
                                       UserManager<Employee> userManager,
-                                      ILeaveAllocationRepository allocationRepository) : base(dbContext)
+                                      ILeaveAllocationRepository allocationRepository,
+                                      AutoMapper.IConfigurationProvider configurationProvider) : base(dbContext)
         {
             _mapper = mapper;
             _accessor = accessor;
             _userManager = userManager;
             _allocationRepository = allocationRepository;
+            _configurationProvider = configurationProvider;
         }
 
         public async Task CancelLeaveRequest(int leaveRequestId)
@@ -92,15 +96,19 @@ namespace LeaveManagement.Repositories
         {
             var leaveRequest = await _entity.Include(q => q.LeaveType)
                                             .Include(q => q.RequestedEmployee)
+                                            .ProjectTo<LeaveRequestViewModel>(_configurationProvider)
                                             .FirstOrDefaultAsync(leaveRequest => leaveRequest.Id == id);
-            return _mapper.Map<LeaveRequestViewModel>(leaveRequest);
+            return leaveRequest;
         }
 
         public async Task<EmployeeLeaveRequestViewModel> GetLeaveRequestsByUser()
         {
             var user = await _userManager.GetUserAsync(_accessor?.HttpContext?.User);
             var allocations = (await _allocationRepository.GetEmployeeAllocations(user.Id)).LeaveAllocations;
-            var requests = _mapper.Map<List<LeaveRequestViewModel>>(await _entity.Include(q => q.LeaveType).Where(request => request.RequestingEmployeeId == user.Id).ToListAsync());
+            var requests = await _entity.Include(q => q.LeaveType)
+                                        .Where(request => request.RequestingEmployeeId == user.Id)
+                                        .ProjectTo<LeaveRequestViewModel>(_configurationProvider)
+                                        .ToListAsync();
 
             var model = new EmployeeLeaveRequestViewModel
             {

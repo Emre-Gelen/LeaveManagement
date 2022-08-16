@@ -14,6 +14,7 @@ namespace LeaveManagement.Models
         public string Email { get; set; }
         [Display(Name = "Date Joined")]
         [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString ="{0:dd-MM-yy}")]
         public DateTime DateJoined { get; set; }
     }
 }
