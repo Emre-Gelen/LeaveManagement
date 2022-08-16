@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using LeaveManagement.Constants;
-using LeaveManagement.Contracts;
+using LeaveManagement.Common.Constants;
+using LeaveManagement.Application.Contracts;
 using LeaveManagement.Data;
-using LeaveManagement.Models;
-using Microsoft.AspNetCore.Http;
+using LeaveManagement.Common.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -59,8 +58,8 @@ namespace LeaveManagement.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    if(await _repository.UpdateEmployeeAllocation(model))
-                        return RedirectToAction(nameof(ViewAllocations), new { id = model.EmployeeId});
+                    if (await _repository.UpdateEmployeeAllocation(model))
+                        return RedirectToAction(nameof(ViewAllocations), new { id = model.EmployeeId });
                 }
             }
             catch (Exception ex)

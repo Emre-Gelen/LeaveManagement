@@ -6,11 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagement.Data;
-using LeaveManagement.Models;
+using LeaveManagement.Common.Models;
 using AutoMapper;
-using LeaveManagement.Contracts;
+using LeaveManagement.Application.Contracts;
 using Microsoft.AspNetCore.Authorization;
-using LeaveManagement.Constants;
+using LeaveManagement.Common.Constants;
 
 namespace LeaveManagement.Controllers
 {
@@ -19,11 +19,13 @@ namespace LeaveManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILeaveRequestRepository _repository;
+        private readonly ILogger<LeaveRequestsController> _logger;
 
-        public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository repository)
+        public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository repository, ILogger<LeaveRequestsController> logger)
         {
             _context = context;
             _repository = repository;
+            _logger = logger;
         }
         [Authorize(Roles = Roles.Administrator)]
         // GET: LeaveRequests
@@ -56,7 +58,7 @@ namespace LeaveManagement.Controllers
             }
             catch (Exception ex)
             {
-
+                _logger.LogError(ex, "Error Approving Request");
                 throw;
             }
             return RedirectToAction(nameof(Index)); 
@@ -69,9 +71,9 @@ namespace LeaveManagement.Controllers
             {
                 await _repository.CancelLeaveRequest(id);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                _logger.LogError(ex, "Error Canceling Request");
                 throw;
             }
             return RedirectToAction(nameof(MyLeave));
@@ -106,6 +108,7 @@ namespace LeaveManagement.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error Creating Request");
                 ModelState.AddModelError(string.Empty, "An error has occured. Please try again later.");
             }
 

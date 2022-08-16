@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagement.Data;
 using AutoMapper;
-using LeaveManagement.Models;
-using LeaveManagement.Contracts;
+using LeaveManagement.Common.Models;
+using LeaveManagement.Application.Contracts;
 using Microsoft.AspNetCore.Authorization;
-using LeaveManagement.Constants;
+using LeaveManagement.Common.Constants;
 
 namespace LeaveManagement.Controllers
 {
@@ -21,7 +21,7 @@ namespace LeaveManagement.Controllers
         private readonly ILeaveTypeRepository _repository;
         private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
-        public LeaveTypesController(ILeaveTypeRepository repository,ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper)
+        public LeaveTypesController(ILeaveTypeRepository repository, ILeaveAllocationRepository leaveAllocationRepository, IMapper mapper)
         {
             _repository = repository;
             _leaveAllocationRepository = leaveAllocationRepository;
@@ -90,11 +90,16 @@ namespace LeaveManagement.Controllers
                 return NotFound();
             }
 
+            var leaveType = await _repository.GetAsync(id);
+            if (leaveType == null)
+                return NotFound();
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _repository.UpdateAsync(_mapper.Map<LeaveType>(leaveTypeVM));
+                    _mapper.Map(leaveTypeVM, leaveType);
+                    await _repository.UpdateAsync(leaveType);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
